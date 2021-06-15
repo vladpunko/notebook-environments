@@ -22,6 +22,11 @@ import subprocess
 import sys
 
 try:
+    _to_unicode = unicode
+except NameError:
+    _to_unicode = str
+
+try:
     from json.decoder import JSONDecodeError
 except ImportError:
     # Use this error when decoder exceptions are thrown at this program runtime.
@@ -110,12 +115,18 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.5"
+__version__ = "0.8.6"
 
 
 def _in_virtual_environment():
+    is_using_venv = (
+        # Take into consideration user's virtual environments based on standard python packages.
+        # See information: https://www.python.org/dev/peps/pep-0405
+        hasattr(sys, "real_prefix") or getattr(sys, "base_prefix", sys.prefix) != sys.prefix
+    )  # pep 405
+
     # Check a virtual environment of the working python interpreter at this program runtime.
-    return hasattr(sys, "real_prefix") or getattr(sys, "base_prefix", sys.prefix) != sys.prefix
+    return bool(os.getenv("CONDA_PREFIX") or os.getenv("VIRTUAL_ENV") or is_using_venv)
 
 
 def _get_data_path(*subdirs):
@@ -180,9 +191,9 @@ def _write_kernel_specification(path):
     }
 
     try:
-        with io.open(os.path.join(path, "kernel.json"), mode="wt") as stream_out:
-            # Create a new specification on the current machine.
-            json.dump(kernel_spec, stream_out, indent=2)
+        with io.open(os.path.join(path, "kernel.json"), mode="wt", encoding="utf-8") as stream_out:
+            # Create a new kernel specification on the current machine.
+            stream_out.write(_to_unicode(json.dumps(kernel_spec, ensure_ascii=False, indent=2)))
     except (IOError, OSError):
         _logger.error("It's impossible to create a new specification on the current machine.")
         # Stop this program runtime and return the exit status code.
@@ -198,7 +209,11 @@ def _provide_required_packages():
                 stdout=devnull,
             )
         except subprocess.CalledProcessError:
-            _logger.error("It's impossible to install packages on the current machine.")
+            _logger.error((
+                "It's impossible to install packages on the current machine.\n"
+                "You are to update setup tools and run the installation process another time.\n"
+                "python -m pip install --upgrade pip setuptools wheel"
+            ))
             # Stop this program runtime and return the exit status code.
             sys.exit(70)
 
@@ -311,7 +326,8 @@ def initialize_new_notebook_environment():
     try:
         from jupyter_core.paths import jupyter_path
     except ImportError:
-        jupyter_path = _get_data_path
+        def jupyter_path(path):  # this function is to return a list
+            return [_get_data_path(path)]
 
     # Find and remove all python kernels from the working notebook server.
     for path in jupyter_path("kernels"):
@@ -339,6 +355,7 @@ def main():  # pragma: no cover
     parser = argparse.ArgumentParser(
         description="Manage python virtual environments on the working notebook server."
     )
+    parser.add_argument("-v", "--version", action="version", version=str(__version__))
 
     # Prevent the users from using two or more arguments at this program runtime.
     group = parser.add_mutually_exclusive_group(required=True)

@@ -85,12 +85,21 @@ class NotebookEnvironmentsTest(TestCase):
         # Remove all the fake python kernels after the each test case from the current machine.
         self.fs.remove_object(self.data_path)
 
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_virtual_environment_active(self, sys_mock):
         sys_mock.activate()
 
         # Check the current state of an active virtual environment for the working python.
         self.assertTrue(notebook_environments._in_virtual_environment())
 
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
+    def test_virtual_environment_active_from_variables(self, sys_mock):
+        sys_mock.deactivate()
+
+        # Check the current state of an active virtual environment for the working python.
+        self.assertTrue(notebook_environments._in_virtual_environment())
+
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_virtual_environment_not_active(self, sys_mock):
         sys_mock.deactivate()
 
@@ -100,6 +109,7 @@ class NotebookEnvironmentsTest(TestCase):
     @mock.patch("notebook_environments.platform")
     @mock.patch("notebook_environments.os.path.expanduser")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_get_data_path(self, logger_mock, expanduser_mock, platform_mock, sys_mock):
         sys_mock.activate()
 
@@ -131,6 +141,7 @@ class NotebookEnvironmentsTest(TestCase):
                     # Check the received exit status code from the function under test.
                     self.assertEqual(system_exit.exception.code, 1)
 
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_get_kernel_name(self, sys_mock):
         sys_mock.activate()
 
@@ -138,6 +149,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.os.path.basename")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_get_kernel_name_error(self, logger_mock, basename_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -175,6 +187,7 @@ class NotebookEnvironmentsTest(TestCase):
                 # Check the received exit status code from the function under test.
                 self.assertEqual(system_exit.exception.code, 78)
 
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_list_kernels_in(self, sys_mock):
         sys_mock.deactivate()
 
@@ -189,6 +202,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.os.listdir")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_list_kernels_in_error(self, logger_mock, listdir_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -215,6 +229,7 @@ class NotebookEnvironmentsTest(TestCase):
             list(notebook_environments._list_kernels_in(""))
 
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_write_python_logos(self, logger_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -242,6 +257,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.subprocess.check_call")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_provide_required_packages(self, logger_mock, check_call_mock, sys_mock):
         sys_mock.activate()
 
@@ -263,13 +279,16 @@ class NotebookEnvironmentsTest(TestCase):
 
             # Check the received error message that was sent from the function under test.
             logger_mock.error.assert_called_with(
-                "It's impossible to install packages on the current machine."
+                "It's impossible to install packages on the current machine.\n"
+                "You are to update setup tools and run the installation process another time.\n"
+                "python -m pip install --upgrade pip setuptools wheel"
             )
 
             # Check the received exit status code from the function under test.
             self.assertEqual(system_exit.exception.code, 70)
 
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_write_kernel_specification(self, logger_mock, sys_mock):
         sys_mock.activate()
 
@@ -314,6 +333,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.os.makedirs")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_create_dir(self, logger_mock, makedirs_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -346,6 +366,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.shutil.rmtree")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_remove_dir(self, logger_mock, rmtree_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -381,6 +402,7 @@ class NotebookEnvironmentsTest(TestCase):
     @mock.patch("notebook_environments._provide_required_packages")
     @mock.patch("notebook_environments._write_kernel_specification")
     @mock.patch("notebook_environments._write_python_logos")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_create_new_kernel(
         self,
         write_python_logos_mock,
@@ -400,6 +422,7 @@ class NotebookEnvironmentsTest(TestCase):
         self.assertTrue(write_python_logos_mock.called)
 
     @mock.patch("notebook_environments._create_new_kernel")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_add_active_environment(self, create_new_kernel_mock, sys_mock):
         sys_mock.activate()
 
@@ -411,6 +434,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments._create_new_kernel")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_add_not_active_environment(self, logger_mock, create_new_kernel_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -430,6 +454,7 @@ class NotebookEnvironmentsTest(TestCase):
             self.assertEqual(system_exit.exception.code, 1)
 
     @mock.patch("notebook_environments._get_data_path")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_remove_active_environment(self, get_data_path_mock, sys_mock):
         sys_mock.activate()
 
@@ -442,6 +467,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments._remove_dir")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_remove_not_active_environment(self, logger_mock, remove_dir_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -461,6 +487,7 @@ class NotebookEnvironmentsTest(TestCase):
             self.assertEqual(system_exit.exception.code, 1)
 
     @mock.patch("notebook_environments._get_data_path")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_remove_dead_kernels(self, get_data_path_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -477,6 +504,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments._list_kernels_in")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_remove_dead_kernels_error(self, logger_mock, list_kernels_in_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -496,6 +524,7 @@ class NotebookEnvironmentsTest(TestCase):
             self.assertEqual(system_exit.exception.code, 71)
 
     @mock.patch("notebook_environments._remove_dir")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_check_and_remove_broken_kernel(self, remove_dir_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -511,6 +540,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments.print")
     @mock.patch("notebook_environments._get_data_path")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_show_kernels(self, get_data_path_mock, print_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -527,6 +557,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments._list_kernels_in")
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_show_kernels_error(self, logger_mock, list_kernels_in_mock, sys_mock):
         sys_mock.deactivate()
 
@@ -547,6 +578,7 @@ class NotebookEnvironmentsTest(TestCase):
 
     @mock.patch("notebook_environments._create_new_kernel")
     @mock.patch("notebook_environments._get_data_path")
+    @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_initialize_new_notebook_environment(
         self,
         get_data_path_mock,
@@ -564,6 +596,7 @@ class NotebookEnvironmentsTest(TestCase):
         create_new_kernel_mock.assert_called_with("python3")
 
     @mock.patch("notebook_environments._logger")
+    @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_initialize_new_notebook_environment_error(self, logger_mock, sys_mock):
         sys_mock.activate()
 
