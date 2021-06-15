@@ -6,30 +6,38 @@ Manage python virtual environments on the working notebook server.
 
 ## Installation
 
-It is recommended to use this package together with [virtualenv](https://github.com/pypa/virtualenv/) and [virtualwrapper](https://bitbucket.org/virtualenvwrapper/virtualenvwrapper/) to work with python virtual environments more suitable.
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install notebook-environments on the current working machine:
+It is recommended to use this package together with [virtualenv](https://github.com/pypa/virtualenv) and [virtualenvwrapper](https://bitbucket.org/virtualenvwrapper/virtualenvwrapper) to work with python virtual environments more suitable. Make sure the installed [python](https://wiki.archlinux.org/title/python) interpreters work without errors on the current operating system. To install this package as a standalone application with the command-line interface you are to run the following command:
 
 ```bash
-python3 -m pip install --user notebook-environments
+sudo sh -c "$(curl https://raw.githubusercontent.com/vladpunko/notebook-environments/master/install.sh)"
 ```
 
-You can also install this python package on your working machine (works for Unix-like operating systems) from source code to `/usr/local/bin` as the standard system location for user's programs (this location can be changed at the user's discretion):
+Use the package manager [pip](https://pip.pypa.io/en/stable) to install notebook-environments without the command-line interface:
+
+```bash
+python3 -m pip install notebook-environments
+```
+
+You can also install this python package on your working machine (works for unix-like operating systems) from source code to `/usr/local/bin` as the standard system location for user's programs (this location can be changed at the user's discretion):
 
 ```bash
 # Step -- 1.
-git clone --branch master https://github.com/vladpunko/notebook-environments.git
+git clone --depth=1 --branch=master https://github.com/vladpunko/notebook-environments.git
 
 # Step -- 2.
 cd ./notebook-environments/
 
 # Step -- 3.
+sudo install -m 755 n.sh /usr/local/bin/n
+
+# Step -- 4.
 sudo install -m 755 notebook_environments.py /usr/local/bin/notebook-environments
 ```
 
 ## Basic usage
 
-Using this program allows you to run one instance of [jupyter notebook](https://github.com/jupyter/notebook/) on your working machine and add different python virtual environments as needed.
-It protects you from the trouble of installing jupyter packages in a new environment and running multiple servers.
+Using this program allows you to run one instance of [notebook](https://github.com/jupyter/notebook) server on your working machine and add different python virtual environments as needed.
+It protects you from the trouble of installing notebook packages in a new environment and running multiple servers.
 
 ```bash
 # Step -- 1.
@@ -62,4 +70,4 @@ tox && tox -e lint
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](https://choosealicense.com/licenses/mit)
