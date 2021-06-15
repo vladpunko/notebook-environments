@@ -7,6 +7,7 @@
 from __future__ import print_function, unicode_literals
 
 import io
+import platform
 
 try:
     from setuptools import setup
@@ -15,6 +16,12 @@ except ImportError:
     from distutils.core import setup
 
 from notebook_environments import __version__
+
+
+_os_name = platform.system().lower()
+# Make sure this python package is compatible with the current operating system.
+if _os_name == "windows" or _os_name.startswith("cygwin"):
+    raise RuntimeError("The notebook-environments program doesn't support windows at this moment.")
 
 
 with io.open("README.markdown", mode="rt", encoding="utf-8") as stream_in:
@@ -39,6 +46,7 @@ setup(
     },
 
     python_requires=">=3.0",  # this package is to work on python version 2.7 or later
+    platforms=["macOS", "POSIX"],
     py_modules=["notebook_environments"],
     classifiers=[
         "Intended Audience :: Developers",
@@ -62,10 +70,4 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Utilities",
     ],
-
-    entry_points={
-        "console_scripts": [
-            "notebook-environments = notebook_environments:main",
-        ],
-    },
 )
