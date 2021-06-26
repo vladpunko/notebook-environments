@@ -139,7 +139,7 @@ class NotebookEnvironmentsTest(TestCase):
                     )
 
                     # Check the received exit status code from the function under test.
-                    self.assertEqual(system_exit.exception.code, 1)
+                    self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
     def test_get_kernel_name(self, sys_mock):
@@ -185,7 +185,7 @@ class NotebookEnvironmentsTest(TestCase):
                 )
 
                 # Check the received exit status code from the function under test.
-                self.assertEqual(system_exit.exception.code, 78)
+                self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_list_kernels_in(self, sys_mock):
@@ -222,7 +222,7 @@ class NotebookEnvironmentsTest(TestCase):
             self.assertEqual(system_exit.exception.code, 0)
 
         # Raise an operating system exception to test a function fault tolerance.
-        listdir_mock.side_effect = OSError("")
+        listdir_mock.side_effect = OSError(errno.EPERM, "")
 
         with self.assertRaises(OSError):
             # Execute a function from the python package under test to run this case.
@@ -241,7 +241,7 @@ class NotebookEnvironmentsTest(TestCase):
 
         with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
-            open_mock.side_effect = OSError("")
+            open_mock.side_effect = OSError(errno.EPERM, "")
 
             with self.assertRaises(SystemExit) as system_exit:
                 # Execute a function from the python package under test to run this case.
@@ -253,7 +253,7 @@ class NotebookEnvironmentsTest(TestCase):
                 )
 
                 # Check the received exit status code from the function under test.
-                self.assertEqual(system_exit.exception.code, 74)
+                self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments.subprocess.check_call")
     @mock.patch("notebook_environments._logger")
@@ -271,7 +271,7 @@ class NotebookEnvironmentsTest(TestCase):
         )
 
         # Raise an installation exception of required packages for error testing.
-        check_call_mock.side_effect = subprocess.CalledProcessError(1, "", "")
+        check_call_mock.side_effect = subprocess.CalledProcessError(errno.EPERM, "", "")
 
         with self.assertRaises(SystemExit) as system_exit:
             # Execute a function from the python package under test to run this case.
@@ -285,7 +285,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 70)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments._logger")
     @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
@@ -317,7 +317,7 @@ class NotebookEnvironmentsTest(TestCase):
 
         with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
-            open_mock.side_effect = OSError("")
+            open_mock.side_effect = OSError(errno.EPERM, "")
 
             with self.assertRaises(SystemExit) as system_exit:
                 # Execute a function from the python package under test to run this case.
@@ -329,7 +329,7 @@ class NotebookEnvironmentsTest(TestCase):
                 )
 
                 # Check the received exit status code from the function under test.
-                self.assertEqual(system_exit.exception.code, 74)
+                self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments.os.makedirs")
     @mock.patch("notebook_environments._logger")
@@ -351,7 +351,7 @@ class NotebookEnvironmentsTest(TestCase):
             notebook_environments._create_dir(self.data_path)
 
             # Raise an operating system exception to test a function fault tolerance.
-            makedirs_mock.side_effect = OSError("")
+            makedirs_mock.side_effect = OSError(errno.EPERM, "")
 
             # Try to call the function under test again for error testing.
             notebook_environments._create_dir(self.data_path)
@@ -362,7 +362,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 71)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments.shutil.rmtree")
     @mock.patch("notebook_environments._logger")
@@ -377,7 +377,7 @@ class NotebookEnvironmentsTest(TestCase):
         rmtree_mock.assert_called_with(self.data_path)
 
         # Raise an operating system exception to test a function fault tolerance.
-        rmtree_mock.side_effect = OSError("")
+        rmtree_mock.side_effect = OSError(errno.EPERM, "")
 
         with self.assertRaises(SystemExit) as system_exit:
             # Execute a function from the python package under test to run this case.
@@ -389,7 +389,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 71)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
         self.fs.create_symlink(self.link_path, self.data_path)
 
@@ -451,7 +451,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 1)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments._get_data_path")
     @mock.patch.dict("notebook_environments.os.environ", {"VIRTUAL_ENV": "test"}, clear=True)
@@ -484,7 +484,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 1)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments._get_data_path")
     @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
@@ -509,7 +509,7 @@ class NotebookEnvironmentsTest(TestCase):
         sys_mock.deactivate()
 
         # Raise an operating system exception to test a function fault tolerance.
-        list_kernels_in_mock.side_effect = OSError("")
+        list_kernels_in_mock.side_effect = OSError(errno.EPERM, "")
 
         with self.assertRaises(SystemExit) as system_exit:
             # Execute a function from the python package under test to run this case.
@@ -521,7 +521,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 71)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments._remove_dir")
     @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
@@ -530,7 +530,7 @@ class NotebookEnvironmentsTest(TestCase):
 
         with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
-            open_mock.side_effect = OSError("")
+            open_mock.side_effect = OSError(errno.EPERM, "")
 
             # Execute a function from the python package under test to run this case.
             notebook_environments._check_and_remove_broken_kernel(self.kernels_paths[0])
@@ -562,7 +562,7 @@ class NotebookEnvironmentsTest(TestCase):
         sys_mock.deactivate()
 
         # Raise an operating system exception to test a function fault tolerance.
-        list_kernels_in_mock.side_effect = OSError("")
+        list_kernels_in_mock.side_effect = OSError(errno.EPERM, "")
 
         with self.assertRaises(SystemExit) as system_exit:
             # Execute a function from the python package under test to run this case.
@@ -574,7 +574,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 71)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
     @mock.patch("notebook_environments._create_new_kernel")
     @mock.patch("notebook_environments._get_data_path")
@@ -610,7 +610,7 @@ class NotebookEnvironmentsTest(TestCase):
             )
 
             # Check the received exit status code from the function under test.
-            self.assertEqual(system_exit.exception.code, 1)
+            self.assertEqual(system_exit.exception.code, errno.EPERM)
 
 
 if __name__ == "__main__":

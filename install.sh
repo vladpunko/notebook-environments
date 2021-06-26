@@ -17,7 +17,7 @@ workdir="$(mktemp -d)"
 git clone --depth=1 --branch=master -- https://github.com/vladpunko/notebook-environments.git "${workdir}" > /dev/null 2>&1 || {
   echo 'An error occurred while downloading the source code to the current machine.' >&2
   # Stop this program runtime and return the exit status code.
-  exit 70
+  exit 1
 }
 
 # Step -- 2.
