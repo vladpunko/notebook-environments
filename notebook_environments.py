@@ -8,7 +8,9 @@ from __future__ import print_function, unicode_literals
 
 import argparse
 import base64
+import binascii
 import collections
+import contextlib
 import errno
 import glob
 import io
@@ -227,8 +229,10 @@ def _write_python_logos(path):
     for logo_name, logo_image in logos_spec.items():
         try:
             with io.open(os.path.join(path, logo_name), mode="wb") as stream_out:
-                # Create a new python logo on the current machine.
-                stream_out.write(base64.b64decode(logo_image))
+                # Skip this step when an unexpected error has occurred.
+                with contextlib.suppress(binascii.Error):
+                    # Create a new python logo on the current machine.
+                    stream_out.write(base64.b64decode(logo_image))
         except (IOError, OSError) as err:
             _logger.error("It's impossible to create python logos on the current machine.")
             # Stop this program runtime and return the exit status code.
