@@ -115,7 +115,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.6"
+__version__ = "0.8.7"
 
 
 def _in_virtual_environment():
@@ -143,7 +143,7 @@ def _get_data_path(*subdirs):
     except KeyError:
         _logger.error("This user's operating system isn't supported now.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(1)
+        sys.exit(errno.EPERM)
 
 
 def _get_kernel_name():
@@ -152,7 +152,7 @@ def _get_kernel_name():
     if not KERNEL_NAME_PATTERN.match(name):
         _logger.error("It's impossible to create a new kernel name with invalid characters.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(78)
+        sys.exit(errno.EPERM)
 
     return name
 
@@ -194,10 +194,10 @@ def _write_kernel_specification(path):
         with io.open(os.path.join(path, "kernel.json"), mode="wt", encoding="utf-8") as stream_out:
             # Create a new kernel specification on the current machine.
             stream_out.write(_to_unicode(json.dumps(kernel_spec, ensure_ascii=False, indent=2)))
-    except (IOError, OSError):
+    except (IOError, OSError) as err:
         _logger.error("It's impossible to create a new specification on the current machine.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(74)
+        sys.exit(getattr(err, "errno", errno.EIO))
 
 
 def _provide_required_packages():
@@ -208,14 +208,14 @@ def _provide_required_packages():
                 stderr=devnull,
                 stdout=devnull,
             )
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as err:
             _logger.error((
                 "It's impossible to install packages on the current machine.\n"
                 "You are to update setup tools and run the installation process another time.\n"
                 "python -m pip install --upgrade pip setuptools wheel"
             ))
             # Stop this program runtime and return the exit status code.
-            sys.exit(70)
+            sys.exit(getattr(err, "errno", errno.EPERM))
 
 
 def _write_python_logos(path):
@@ -229,10 +229,10 @@ def _write_python_logos(path):
             with io.open(os.path.join(path, logo_name), mode="wb") as stream_out:
                 # Create a new python logo on the current machine.
                 stream_out.write(base64.b64decode(logo_image))
-        except (IOError, OSError):
+        except (IOError, OSError) as err:
             _logger.error("It's impossible to create python logos on the current machine.")
             # Stop this program runtime and return the exit status code.
-            sys.exit(74)
+            sys.exit(getattr(err, "errno", errno.EIO))
 
 
 def _check_and_remove_broken_kernel(path):
@@ -260,7 +260,7 @@ def _create_dir(path):
         else:
             _logger.error("It's impossible to create a new directory on the current machine.")
             # Stop this program runtime and return the exit status code.
-            sys.exit(71)
+            sys.exit(getattr(err, "errno", errno.EPERM))
 
 
 def _remove_dir(path):
@@ -270,10 +270,10 @@ def _remove_dir(path):
         else:
             # Execute a function to remove the specified directory tree from the current machine.
             shutil.rmtree(path)
-    except OSError:
+    except OSError as err:
         _logger.error("It's impossible to remove a directory from the current machine.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(71)
+        sys.exit(getattr(err, "errno", errno.EPERM))
 
 
 def _create_new_kernel(name):
@@ -289,7 +289,7 @@ def add_active_environment():
     if not _in_virtual_environment():
         _logger.error("This action is blocked because a specific python environment isn't active.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(1)
+        sys.exit(errno.EPERM)
 
     # Add an active python environment to the working notebook server on the current machine.
     _create_new_kernel(_get_kernel_name())
@@ -299,7 +299,7 @@ def remove_active_environment():
     if not _in_virtual_environment():
         _logger.error("This action is blocked because a specific python environment isn't active.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(1)
+        sys.exit(errno.EPERM)
 
     # Find and remove an active python environment from the working notebook server.
     for path in glob.glob(_get_data_path("kernels", _get_kernel_name())):
@@ -311,17 +311,17 @@ def purge_broken_kernels():
         # Find and remove broken python kernels from the working notebook server.
         for kernel_info in _list_kernels_in(_get_data_path("kernels")):
             _check_and_remove_broken_kernel(kernel_info.path)
-    except OSError:
+    except OSError as err:
         _logger.error("It's impossible to find and remove broken python kernels.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(71)
+        sys.exit(getattr(err, "errno", errno.EPERM))
 
 
 def initialize_new_notebook_environment():
     if _in_virtual_environment():
         _logger.error("This action is blocked because a specific python environment is active.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(1)
+        sys.exit(errno.EPERM)
 
     try:
         from jupyter_core.paths import jupyter_path
@@ -343,10 +343,10 @@ def show_kernels():
         for kernel_info in _list_kernels_in(_get_data_path("kernels")):
             # Show information about the location of a kernel on the current machine.
             print("kernel: {0} --> {1}".format(kernel_info.name, kernel_info.path))
-    except OSError:
+    except OSError as err:
         _logger.error("It's impossible to show python kernels on the working notebook server.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(71)
+        sys.exit(getattr(err, "errno", errno.EPERM))
 
 
 def main():  # pragma: no cover
@@ -403,10 +403,10 @@ def main():  # pragma: no cover
     try:
         # Execute a command on the current machine.
         parser.parse_args().command()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as err:
         _logger.error("Stop this program runtime on the current machine.")
         # Stop this program runtime and return the exit status code.
-        sys.exit(130)
+        sys.exit(getattr(err, "errno", errno.EINTR))
 
 
 if __name__ == "__main__":
