@@ -118,7 +118,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.7"
+__version__ = "0.8.8"
 
 
 def _in_virtual_environment():
@@ -199,6 +199,7 @@ def _write_kernel_specification(path):
             stream_out.write(_to_unicode(json.dumps(kernel_spec, ensure_ascii=False, indent=2)))
     except (IOError, OSError) as err:
         _logger.error("It's impossible to create a new specification on the current machine.")
+        _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
         # Stop this program runtime and return the exit status code.
         sys.exit(getattr(err, "errno", errno.EIO))
 
@@ -217,6 +218,7 @@ def _provide_required_packages():
                 "You are to update setup tools and run the installation process another time.\n"
                 "python -m pip install --upgrade pip setuptools wheel"
             ))
+            _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
             # Stop this program runtime and return the exit status code.
             sys.exit(getattr(err, "errno", errno.EPERM))
 
@@ -236,6 +238,7 @@ def _write_python_logos(path):
                     stream_out.write(base64.b64decode(logo_image))
         except (IOError, OSError) as err:
             _logger.error("It's impossible to create python logos on the current machine.")
+            _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
             # Stop this program runtime and return the exit status code.
             sys.exit(getattr(err, "errno", errno.EIO))
 
@@ -264,6 +267,7 @@ def _create_dir(path):
             pass
         else:
             _logger.error("It's impossible to create a new directory on the current machine.")
+            _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
             # Stop this program runtime and return the exit status code.
             sys.exit(getattr(err, "errno", errno.EPERM))
 
@@ -277,6 +281,7 @@ def _remove_dir(path):
             shutil.rmtree(path)
     except OSError as err:
         _logger.error("It's impossible to remove a directory from the current machine.")
+        _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
         # Stop this program runtime and return the exit status code.
         sys.exit(getattr(err, "errno", errno.EPERM))
 
@@ -318,6 +323,7 @@ def purge_broken_kernels():
             _check_and_remove_broken_kernel(kernel_info.path)
     except OSError as err:
         _logger.error("It's impossible to find and remove broken python kernels.")
+        _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
         # Stop this program runtime and return the exit status code.
         sys.exit(getattr(err, "errno", errno.EPERM))
 
@@ -350,6 +356,7 @@ def show_kernels():
             print("kernel: {0} --> {1}".format(kernel_info.name, kernel_info.path))
     except OSError as err:
         _logger.error("It's impossible to show python kernels on the working notebook server.")
+        _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
         # Stop this program runtime and return the exit status code.
         sys.exit(getattr(err, "errno", errno.EPERM))
 
@@ -361,6 +368,15 @@ def main():  # pragma: no cover
         description="Manage python virtual environments on the working notebook server."
     )
     parser.add_argument("-v", "--version", action="version", version=str(__version__))
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_const",
+        const=logging.DEBUG,  # level must be an int or a str
+        default=logging.WARNING,
+        dest="logging_level",
+        help="print a lot of debugging statements while executing user's commands",
+    )
 
     # Prevent the users from using two or more arguments at this program runtime.
     group = parser.add_mutually_exclusive_group(required=True)
@@ -369,7 +385,7 @@ def main():  # pragma: no cover
         "--add",
         action="store_const",
         const=add_active_environment,
-        dest="command",
+        dest="user_command",
         help="add an active python environment to the working notebook server",
     )
     group.add_argument(
@@ -377,7 +393,7 @@ def main():  # pragma: no cover
         "--remove",
         action="store_const",
         const=remove_active_environment,
-        dest="command",
+        dest="user_command",
         help="find and remove an active python environment from the working notebook server",
     )
     group.add_argument(
@@ -385,7 +401,7 @@ def main():  # pragma: no cover
         "--purge",
         action="store_const",
         const=purge_broken_kernels,
-        dest="command",
+        dest="user_command",
         help="find and remove broken python kernels from the working notebook server",
     )
     group.add_argument(
@@ -393,7 +409,7 @@ def main():  # pragma: no cover
         "--initialize",
         action="store_const",
         const=initialize_new_notebook_environment,
-        dest="command",
+        dest="user_command",
         help="find and remove all python kernels and add the working interpreter",
     )
     group.add_argument(
@@ -401,15 +417,21 @@ def main():  # pragma: no cover
         "--show",
         action="store_const",
         const=show_kernels,
-        dest="command",
+        dest="user_command",
         help="show active python kernels on the working notebook server",
     )
 
     try:
+        arguments = parser.parse_args()
+
+        # Set a new logging level of the preferred reporting system.
+        _logger.setLevel(arguments.logging_level)
+
         # Execute a command on the current machine.
-        parser.parse_args().command()
+        arguments.user_command()
     except KeyboardInterrupt as err:
         _logger.error("Stop this program runtime on the current machine.")
+        _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
         # Stop this program runtime and return the exit status code.
         sys.exit(getattr(err, "errno", errno.EINTR))
 
