@@ -105,7 +105,8 @@ KERNEL_NAME_PATTERN = re.compile(r"^[a-z0-9._\-]+$", re.IGNORECASE)
 # Create a structure to store information about the location of a kernel on the current machine.
 _kernel_info = collections.namedtuple(typename="kernel_info", field_names=("name", "path"))
 
-# Create a new instance of the preferred reporting system.
+logging.basicConfig(format="[%(levelname)s]: %(message)s")
+# Create a new instance of the preferred reporting system for this program.
 _logger = logging.getLogger(__name__)
 
 
