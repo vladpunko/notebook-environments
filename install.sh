@@ -27,6 +27,6 @@ install -m 755 "${workdir}/n.sh" /usr/local/bin/n
 install -m 755 "${workdir}/notebook_environments.py" /usr/local/bin/notebook-environments
 
 _cleanup() {
-  rm -r -- "${workdir}"
+  rm -f -r -- "${workdir}"
 }
-trap _cleanup EXIT
+trap _cleanup 0 1 2 3 6
