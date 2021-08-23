@@ -16,6 +16,7 @@ import glob
 import io
 import json
 import logging
+import logging.config
 import os
 import platform
 import re
@@ -105,9 +106,39 @@ KERNEL_NAME_PATTERN = re.compile(r"^[a-z0-9._\-]+$", re.IGNORECASE)
 # Create a structure to store information about the location of a kernel on the current machine.
 _kernel_info = collections.namedtuple(typename="kernel_info", field_names=("name", "path"))
 
-logging.basicConfig(format="[%(levelname)s]: %(message)s")
+LOGGING_CONFIG = {
+    "formatters": {
+        "default": {
+            "format": "[%(levelname)s] %(name)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "logfile": {
+            "class": "logging.FileHandler",
+            "encoding": "utf-8",
+            "filename": "/tmp/notebook-environments.log",
+            "formatter": "default",
+            "mode": "wt",
+        },
+        "stdout": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "stream": "ext://sys.stdout",
+        },
+    },
+    "loggers": {
+        "notebook-environments": {
+            "handlers": ["logfile", "stdout"],
+            # Don't send it up this namespace for additional handling.
+            "propagate": False,
+        },
+    },
+    # Set the preferred schema version.
+    "version": 1,
+}
+logging.config.dictConfig(config=LOGGING_CONFIG)
 # Create a new instance of the preferred reporting system for this program.
-_logger = logging.getLogger(__name__)
+_logger = logging.getLogger("notebook-environments")
 
 
 __all__ = (
@@ -118,7 +149,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.8"
+__version__ = "0.8.9"
 
 
 def _in_virtual_environment():
