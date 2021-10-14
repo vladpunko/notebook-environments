@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 try:
     _to_unicode = unicode
@@ -116,7 +117,7 @@ LOGGING_CONFIG = {
         "logfile": {
             "class": "logging.FileHandler",
             "encoding": "utf-8",
-            "filename": "/tmp/notebook-environments.log",
+            "filename": os.path.join(tempfile.gettempdir(), "notebook-environments.log"),
             "formatter": "default",
             "mode": "wt",
         },
