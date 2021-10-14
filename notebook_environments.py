@@ -149,7 +149,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.9"
+__version__ = "0.8.10"
 
 
 def _in_virtual_environment():
@@ -240,8 +240,8 @@ def _provide_required_packages():
         try:
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", "ipykernel"],
-                stderr=devnull,
                 stdout=devnull,
+                stderr=sys.stderr,  # use this system stream to show all package errors
             )
         except subprocess.CalledProcessError as err:
             _logger.error((
@@ -366,7 +366,7 @@ def initialize_new_notebook_environment():
         sys.exit(errno.EPERM)
 
     try:
-        from jupyter_core.paths import jupyter_path
+        from jupyter_core.paths import jupyter_path  # noqa
     except ImportError:
         def jupyter_path(path):  # this function is to return a list
             return [_get_data_path(path)]
