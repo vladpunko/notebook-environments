@@ -34,6 +34,9 @@ class SysMock(object):
         # Use the standard system function to stop code execution.
         self.exit = sys.exit
 
+        self.stdout = sys.stdout
+        self.stderr = sys.stderr
+
     def activate(self):
         # Start a new python virtual environment and keep it running.
         self.prefix = "/root/.test"
