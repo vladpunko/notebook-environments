@@ -45,7 +45,7 @@ setup(
         "Source code": "https://github.com/vladpunko/notebook-environments",
     },
 
-    python_requires=">=3.0",  # this package is to work on python version 2.7 or later
+    python_requires=">=2.7",  # this package is to work on python version 2.7 or later
     platforms=["macOS", "POSIX"],
     py_modules=["notebook_environments"],
     classifiers=[
@@ -58,14 +58,15 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
 
-        # "Programming Language :: Python :: 2",
-        # "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
 
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Utilities",

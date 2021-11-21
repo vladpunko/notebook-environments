@@ -14,11 +14,16 @@ import stat
 import subprocess
 import sys
 import unittest
-import unittest.mock as mock
 
+import six
 from pyfakefs.fake_filesystem_unittest import TestCase
 
 import notebook_environments
+
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 
 class SysMock(object):
@@ -85,8 +90,13 @@ class NotebookEnvironmentsTest(TestCase):
                 json.dump(kernel_spec, stream_out)
 
     def tearDown(self):
-        # Remove all the fake python kernels after the each test case from the current machine.
-        self.fs.remove_object(self.data_path)
+        if os.path.exists(self.data_path):
+            # Remove all the fake python kernels after the each test case from the current machine.
+            self.fs.remove_object(self.data_path)
+
+    def _assertCountEqual(self, *args, **kwargs):
+        # An unordered sequence comparison asserting that the same elements.
+        return six.assertCountEqual(self, *args, **kwargs)
 
     @mock.patch.dict("notebook_environments.os.environ", {}, clear=True)
     def test_virtual_environment_active(self, sys_mock):
@@ -194,7 +204,7 @@ class NotebookEnvironmentsTest(TestCase):
     def test_list_kernels_in(self, sys_mock):
         sys_mock.deactivate()
 
-        self.assertCountEqual(
+        self._assertCountEqual(  # for python2 and python3
             list(notebook_environments._list_kernels_in(self.data_path)),
             [
                 notebook_environments._kernel_info(os.path.basename(kernel_path), kernel_path)
@@ -242,7 +252,7 @@ class NotebookEnvironmentsTest(TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.data_path, "logo-32x32.png")))
         self.assertTrue(os.path.isfile(os.path.join(self.data_path, "logo-64x64.png")))
 
-        with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
+        with mock.patch("notebook_environments.io.open") as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
             open_mock.side_effect = OSError(errno.EPERM, "")
 
@@ -318,7 +328,7 @@ class NotebookEnvironmentsTest(TestCase):
             # Check the correctness of the current settings for the installed kernel system.
             self.assertEqual(json.load(stream_in), kernel_spec)
 
-        with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
+        with mock.patch("notebook_environments.io.open") as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
             open_mock.side_effect = OSError(errno.EPERM, "")
 
@@ -531,7 +541,7 @@ class NotebookEnvironmentsTest(TestCase):
     def test_check_and_remove_broken_kernel(self, remove_dir_mock, sys_mock):
         sys_mock.deactivate()
 
-        with mock.patch("notebook_environments.io.open", new=mock.mock_open()) as open_mock:
+        with mock.patch("notebook_environments.io.open") as open_mock:
             # Raise an operating system exception to test a function fault tolerance.
             open_mock.side_effect = OSError(errno.EPERM, "")
 
