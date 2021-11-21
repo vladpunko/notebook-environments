@@ -108,28 +108,28 @@ _kernel_info = collections.namedtuple(typename="kernel_info", field_names=("name
 LOGGING_CONFIG = {
     "formatters": {
         "default": {
-            "format": "[%(levelname)s] %(name)s: %(message)s",
+            "format": "%(asctime)s - %(levelname)s :: %(name)s :: %(message)s",
+            # Use this string to format the creation time of the record.
+            "datefmt": "%Y-%m-%d--%H-%M-%S",
         },
     },
     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "stream": "ext://sys.stdout",
+        },
         "logfile": {
             "class": "logging.FileHandler",
             "encoding": "utf-8",
             "filename": os.path.join(tempfile.gettempdir(), "notebook-environments.log"),
             "formatter": "default",
-            "mode": "wt",
-        },
-        "stdout": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "stream": "ext://sys.stdout",
+            "mode": "at",
         },
     },
     "loggers": {
         "notebook-environments": {
-            "handlers": ["logfile", "stdout"],
-            # Don't send it up this namespace for additional handling.
-            "propagate": False,
+            "handlers": ["console", "logfile"],
         },
     },
     # Set the preferred schema version.
@@ -148,7 +148,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.10"
+__version__ = "0.8.11"
 
 
 def _in_virtual_environment():
