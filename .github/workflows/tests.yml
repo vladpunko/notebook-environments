@@ -1,0 +1,29 @@
+name: python testing and linting
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Step -- 1.
+        uses: actions/checkout@v3
+
+      - name: Step -- 2.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Step -- 3.
+        run: pip3 install --upgrade pip && pip3 install --no-cache-dir --upgrade tox
+
+      - name: Step -- 4.
+        run: tox && tox -e lint

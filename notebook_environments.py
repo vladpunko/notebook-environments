@@ -22,6 +22,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import warnings
 
 try:
     _to_unicode = unicode
@@ -148,7 +149,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.11"
+__version__ = "0.8.12"
 
 
 def _in_virtual_environment():
@@ -363,7 +364,10 @@ def initialize_new_notebook_environment():
         sys.exit(errno.EPERM)
 
     try:
-        from jupyter_core.paths import jupyter_path  # noqa
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            from jupyter_core.paths import jupyter_path  # noqa
     except ImportError:
         def jupyter_path(subdirs):  # this function is to return a list
             return [_get_data_path(subdirs)]

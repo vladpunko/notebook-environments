@@ -24,7 +24,7 @@ if _os_name == "windows" or _os_name.startswith("cygwin"):
     raise RuntimeError("The notebook-environments program doesn't support windows at this moment.")
 
 
-with io.open("README.markdown", mode="rt", encoding="utf-8") as stream_in:
+with io.open("README.md", mode="rt", encoding="utf-8") as stream_in:
     # Load the readme file and use it as the long description for this python package.
     long_description = stream_in.read()
 
@@ -67,6 +67,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
 
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Utilities",
