@@ -27,7 +27,6 @@ except ImportError:
 
 
 class SysMock(object):
-
     def __init__(self):
         self.base_prefix = "/usr/bin"
 
@@ -52,7 +51,6 @@ class SysMock(object):
 
 @mock.patch("notebook_environments.sys", new_callable=SysMock)
 class NotebookEnvironmentsTest(TestCase):
-
     data_path = "/root/kernels"
 
     # Set the list of fake python kernels.
@@ -166,26 +164,28 @@ class NotebookEnvironmentsTest(TestCase):
     def test_get_kernel_name_error(self, logger_mock, basename_mock, sys_mock):
         sys_mock.deactivate()
 
-        for invalid_character in sorted((
-            ":",
-            "?",
-            "[",
-            "]",
-            "{",
-            "}",
-            "@",
-            "&",
-            "#",
-            "%",
-            "^",
-            "+",
-            "<",
-            "=",
-            ">",
-            "|",
-            "~",
-            "$",
-        )):
+        for invalid_character in sorted(
+            (
+                ":",
+                "?",
+                "[",
+                "]",
+                "{",
+                "}",
+                "@",
+                "&",
+                "#",
+                "%",
+                "^",
+                "+",
+                "<",
+                "=",
+                ">",
+                "|",
+                "~",
+                "$",
+            )
+        ):
             basename_mock.return_value = "test{0}test".format(invalid_character)
 
             with self.assertRaises(SystemExit) as system_exit:

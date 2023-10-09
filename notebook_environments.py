@@ -21,7 +21,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import warnings
 
 try:
@@ -106,39 +105,9 @@ KERNEL_NAME_PATTERN = re.compile(r"^[a-z0-9._\-]+$", re.IGNORECASE)
 # Create a structure to store information about the location of a kernel on the current machine.
 _kernel_info = collections.namedtuple(typename="kernel_info", field_names=("name", "path"))
 
-LOGGING_CONFIG = {
-    "formatters": {
-        "default": {
-            "format": "%(asctime)s - %(levelname)s :: %(name)s :: %(message)s",
-            # Use this string to format the creation time of the record.
-            "datefmt": "%Y-%m-%d--%H-%M-%S",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "stream": "ext://sys.stdout",
-        },
-        "logfile": {
-            "class": "logging.FileHandler",
-            "encoding": "utf-8",
-            "filename": os.path.join(tempfile.gettempdir(), "notebook-environments.log"),
-            "formatter": "default",
-            "mode": "at",
-        },
-    },
-    "loggers": {
-        "notebook-environments": {
-            "handlers": ["console", "logfile"],
-        },
-    },
-    # Set the preferred schema version.
-    "version": 1,
-}
-logging.config.dictConfig(config=LOGGING_CONFIG)
+logging.basicConfig(format="%(levelname)s :: %(name)s :: %(message)s")
 # Create a new instance of the preferred reporting system for this program.
-_logger = logging.getLogger("notebook-environments")
+_logger = logging.getLogger("notebook_environments")
 
 
 __all__ = (
@@ -149,14 +118,15 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.12"
+__version__ = "0.8.13"
 
 
 def _in_virtual_environment():
     is_using_venv = (
         # Take into consideration user's virtual environments based on standard python packages.
         # See information: https://www.python.org/dev/peps/pep-0405
-        hasattr(sys, "real_prefix") or getattr(sys, "base_prefix", sys.prefix) != sys.prefix
+        hasattr(sys, "real_prefix")
+        or getattr(sys, "base_prefix", sys.prefix) != sys.prefix
     )  # pep 405
 
     # Check a virtual environment of the working python interpreter at this program runtime.
@@ -167,7 +137,6 @@ def _get_data_path(*subdirs):
     paths_spec = {
         # Set the main path to store notebook server settings on mac operating systems.
         "darwin": os.path.join(os.path.expanduser("~/Library/Jupyter"), *subdirs),
-
         # Set the main path to store notebook server settings on unix operating systems.
         "linux": os.path.join(os.path.expanduser("~/.local/share/jupyter"), *subdirs),
     }
@@ -244,11 +213,13 @@ def _provide_required_packages():
                 stderr=sys.stderr,  # use this system stream to show all package errors
             )
         except subprocess.CalledProcessError as err:
-            _logger.error((
-                "It's impossible to install packages on the current machine.\n"
-                "You are to update setup tools and run the installation process another time.\n"
-                "python -m pip install --upgrade pip setuptools wheel"
-            ))
+            _logger.error(
+                (
+                    "It's impossible to install packages on the current machine.\n"
+                    "You are to update setup tools and run the installation process another time.\n"
+                    "python -m pip install --upgrade pip setuptools wheel"
+                )
+            )
             _logger.debug("An unexpected error occurred at this program runtime:", exc_info=True)
             # Stop this program runtime and return the exit status code.
             sys.exit(getattr(err, "errno", errno.EPERM))
@@ -369,6 +340,7 @@ def initialize_new_notebook_environment():
 
             from jupyter_core.paths import jupyter_path  # noqa
     except ImportError:
+
         def jupyter_path(subdirs):  # this function is to return a list
             return [_get_data_path(subdirs)]
 
@@ -394,7 +366,6 @@ def show_kernels():
 
 
 def main():  # pragma: no cover
-
     # Create a new instance of the preferred argument parser.
     parser = argparse.ArgumentParser(
         description="Manage python virtual environments on the working notebook server."

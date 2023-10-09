@@ -2,7 +2,7 @@
 repos:
   # Set the list of basic git hooks to find and fix common problems in the current working tree.
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9
     hooks:
       - id: check-executables-have-shebangs
       - id: check-yaml
@@ -12,7 +12,7 @@ repos:
 
   # Use the static code checker to find and fix logical errors in python source code.
   - repo: https://github.com/pycqa/flake8
-    rev: 3.9.2
+    rev: b9a7794c4f425ef8419081e6993f99419cc667ea
     hooks:
       - id: flake8
         language_version: python3
