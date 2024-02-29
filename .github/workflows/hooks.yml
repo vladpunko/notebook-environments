@@ -1,0 +1,25 @@
+name: git hooks
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  hooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Step -- 1.
+        uses: actions/checkout@v4
+
+      - name: Step -- 2.
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Step -- 3.
+        run: pip3 install --upgrade pip && pip3 install --no-cache-dir --upgrade pre-commit
+
+      - name: Step -- 4.
+        run: python3 -m pre_commit run --all-files --config .githooks.yml

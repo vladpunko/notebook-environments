@@ -118,7 +118,7 @@ __all__ = (
     "show_kernels",
 )
 
-__version__ = "0.8.13"
+__version__ = "0.8.14"
 
 
 def _in_virtual_environment():

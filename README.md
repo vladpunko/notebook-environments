@@ -1,5 +1,6 @@
 # notebook-environments
 
+![hooks](https://github.com/vladpunko/notebook-environments/actions/workflows/hooks.yml/badge.svg)
 ![tests](https://github.com/vladpunko/notebook-environments/actions/workflows/tests.yml/badge.svg)
 
 Manage python virtual environments on the working notebook server.
