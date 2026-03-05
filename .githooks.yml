@@ -12,7 +12,7 @@ repos:
 
   # Use the static code checker to find and fix logical errors in python source code.
   - repo: https://github.com/pycqa/flake8
-    rev: b9a7794c4f425ef8419081e6993f99419cc667ea
+    rev: c48217e1fc006c2dddd14df54e83b67da15de5cd
     hooks:
       - id: flake8
         language_version: python3
